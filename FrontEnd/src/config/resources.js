@@ -47,8 +47,22 @@ export const resources = {
     eyebrow: 'Control de asistencia',
     description: 'Registra la hora, fecha y detalle vinculados a cada estudiante y grado.',
     fields: [
-      { name: 'idEstudiante', label: 'Estudiante', type: 'select', optionSource: 'estudiantes' },
-      { name: 'idGrado', label: 'Grado', type: 'select', optionSource: 'grados' },
+      {
+        name: 'idEstudiante',
+        label: 'Estudiante',
+        type: 'select',
+        optionSource: 'estudiantes',
+        optionIdField: 'idEstudiante',
+        optionLabel: (student) => `${student.nombre} · NIE ${student.nie}`
+      },
+      {
+        name: 'idGrado',
+        label: 'Grado',
+        type: 'select',
+        optionSource: 'grados',
+        optionIdField: 'idGrado',
+        optionLabel: (grade) => grade.nombre
+      },
       { name: 'horaLlegada', label: 'Hora de llegada', type: 'time' },
       { name: 'fecha', label: 'Fecha', type: 'date' },
       { name: 'detalle', label: 'Detalle', type: 'textarea', placeholder: 'Describe brevemente el motivo o contexto' }
@@ -63,6 +77,16 @@ export const resources = {
     searchValue: (row) => `${row.estudiante?.nombre || ''} ${row.grado?.nombre || ''} ${row.detalle || ''} ${formatDate(row.fecha)}`
   }
 };
+
+export function getSelectOptions(field, relatedData) {
+  if (!field.optionSource || !field.optionIdField || !field.optionLabel) return [];
+  return (relatedData[field.optionSource] || [])
+    .map((record) => ({
+      id: record[field.optionIdField],
+      label: field.optionLabel(record)
+    }))
+    .filter((option) => option.id !== null && option.id !== undefined && option.label);
+}
 
 export function formatDate(value) {
   if (!value) return '—';

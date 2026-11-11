@@ -2,13 +2,13 @@ import { useState } from 'react';
 import DataTable from '../components/DataTable';
 import Icon from '../components/Icon';
 import PageHeader from '../components/PageHeader';
-import { recordToForm } from '../config/resources';
+import { getSelectOptions, recordToForm } from '../config/resources';
 
 export default function ResourceFormPage({ resource, records, relatedData, initialRecord, busy, onSave, onDelete, onNotify }) {
   const [selectedRecord, setSelectedRecord] = useState(initialRecord || null);
   const [formValues, setFormValues] = useState(() => recordToForm(resource, initialRecord));
   const [editable, setEditable] = useState(!initialRecord);
-  const missingRelations = resource.fields.some((field) => field.optionSource && (relatedData[field.optionSource] || []).length === 0);
+  const missingRelations = resource.fields.some((field) => field.optionSource && getSelectOptions(field, relatedData).length === 0);
 
   const clearForm = () => {
     setSelectedRecord(null);
@@ -61,7 +61,7 @@ export default function ResourceFormPage({ resource, records, relatedData, initi
             <div className="form-fields">
               {resource.fields.map((field) => {
                 const value = formValues[field.name] ?? '';
-                const options = field.optionSource ? relatedData[field.optionSource] || [] : [];
+                const options = field.optionSource ? getSelectOptions(field, relatedData) : [];
                 const noOptions = field.type === 'select' && options.length === 0;
                 const fieldProps = {
                   id: `${resource.key}-${field.name}`,
